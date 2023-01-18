@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { queryValues, fetchGallery } from 'components/API/API';
@@ -8,117 +8,100 @@ import Button from 'components/Button/Button';
 import Loader from 'components/Loader/Loader';
 import Modal from 'components/Modal/Modal';
 
-class App extends React.Component {
-  state = {
-    images: [],
-    query: '',
-    page: 1,
-    error: null,
-    status: 'idle',
-    showButton: false,
-    largeImageURL: '',
-    showModal: false,
-    tags: '',
-  };
+function App() {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const [showButton, setShowButton] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [tags, setTags] = useState('');
 
-  handleFormSubmit = query => {
-    if (query === this.state.query) {
+  const handleFormSubmit = query => {
+    if (query) {
       return;
     }
-    this.setState({
-      query,
-      page: 1,
-      images: [],
-      showButton: false,
-      status: 'idle',
-    });
+    setQuery();
+    setPage(1);
+    setImages ([]);
+    setShowButton(false) ;
+    setStatus('idle') 
+  };
+  
+
+  const loadMoreImages = () => {
+    setPage( prevPage=> prevPage + 1 );
   };
 
-  loadMoreImages = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
-
-  componentDidUpdate(prevProps, prevState) {
-    const prevName = prevState.query;
-    const nextName = this.state.query;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
+  useEffect(() => {
+    const prevName = setQuery;
+    const nextName = query;
+    const prevPage = setPage;
+    const nextPage = page;
 
     if (prevName !== nextName || prevPage !== nextPage) {
-      this.renderGallery();
+      renderGallery();
     }
-  }
+  }, [page, query]
+  );
 
-  renderGallery = async () => {
-    const { query, page } = this.state;
-    this.setState({ status: 'pending' });
+  const renderGallery = async () => {
+        setStatus('pending');
     try {
       const { hits, totalHits } = await fetchGallery(query, page);
-
       if (totalHits === 0) {
-        this.setState({ showButton: false, status: 'idle' });
-        return toast.warn('No images on your query!');
-      }
+        setShowButton(false);
+        setStatus('idle')
+        return toast.warn('No images on your query!')
+      };
+  
       const newImages = queryValues(hits);
-      this.setState(({ images }) => ({
-        images: [...images, ...newImages],
+      setImages([...images, ...newImages],
         totalHits,
-      }));
-      this.setState({
-        status: 'resolved',
-        showButton: true,
-      });
+      );
+      setShowButton(true);
+      setStatus('resolved');
+        
     } catch (error) {
-      this.setState({ error, status: 'rejected' });
+      setError(error); setStatus ('rejected' ) ;
       toast.error('Oops... Something went wrong');
     } finally {
-      this.setState({ status: 'idle' });
+      setStatus('idle');
     }
   };
 
-  openModal = (largeImageURL, tags) => {
-    this.toggleModal();
-    this.setState({
-      largeImageURL,
-      tags,
-    });
+  const openModal = (largeImageURL, tags) => {
+    toggleModal();
+    setLargeImageURL(largeImageURL);
+      setTags(tags)
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
+  const toggleModal = () => {
+    setShowModal(({ showModal }) => ({
       showModal: !showModal,
     }));
   };
 
-  render() {
-    const { images, status, showButton, largeImageURL, tags, showModal } =
-      this.state;
-    return (
-      <div>
-        <Searchbar onSubmit={this.handleFormSubmit}></Searchbar>
-        {images.length > 0 && (
-          <ImageGallery
-            images={images}
-            openModal={this.openModal}
-          ></ImageGallery>
-        )}{' '}
-        {status === 'pending' && <Loader />}
-        {showButton && <Button onLoadMore={this.loadMoreImages}></Button>}
-        {showModal && (
-          <Modal
-            onModalClick={this.toggleModal}
-            largeImageURL={largeImageURL}
-            tags={tags}
-          />
-        )}
-        <ToastContainer
-          position="top-center"
-          autoClose={3000}
-          theme="colored"
+  return (
+    <div>
+      <Searchbar onSubmit={handleFormSubmit}></Searchbar>
+      {images.length > 0 && (
+        <ImageGallery images={images} openModal={openModal}></ImageGallery>
+      )}{' '}
+      {status === 'pending' && <Loader />}
+      {showButton && <Button onLoadMore={loadMoreImages}></Button>}
+      {showModal && (
+        <Modal
+          onModalClick={toggleModal}
+          largeImageURL={largeImageURL}
+          tags={tags}
         />
-      </div>
-    );
-  }
-}
+      )}
+      <ToastContainer position="top-center" autoClose={3000} theme="colored" />
+    </div>
+  )
+};
 
 export default App;
