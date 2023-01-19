@@ -9,9 +9,9 @@ function Searchbar({ onSubmit }) {
   const [query, setQuery] = useState('');
 
   const handleSubmit = event => {
-    event.cancelable && event.preventDefault();
+    event.preventDefault();
 
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = query.toLowerCase();
 
     if (normalizedQuery === '') {
       toast.error('Please enter image title!', {
@@ -23,7 +23,7 @@ function Searchbar({ onSubmit }) {
     }
 
     onSubmit(normalizedQuery);
-    setQuery({ query: '' });
+    setQuery('');
     event.target.reset();
   };
 
