@@ -24,6 +24,7 @@ function Searchbar({ onSubmit }) {
 
     onSubmit(normalizedQuery);
     setQuery({ query: '' });
+    event.target.reset();
   };
 
   return (
@@ -41,7 +42,7 @@ function Searchbar({ onSubmit }) {
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
-          onChange={({ target }) => setQuery(target.value)}
+          onChange={({ target }) => setQuery(target.value.toLowerCase())}
         />
       </form>
     </header>
