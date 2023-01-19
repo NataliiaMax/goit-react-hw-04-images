@@ -5,16 +5,15 @@ import style from './Searchbar.module.css';
 import { ImSearch } from 'react-icons/im';
 import PropTypes from 'prop-types';
 
-function Searchbar() {
+function Searchbar({ onSubmit }) {
   const [query, setQuery] = useState('');
 
-  const handleImageChange = event => {
-    setQuery({ query: event.currentTarget.value.toLowerCase() });
-  };
-
   const handleSubmit = event => {
-    event.preventDefault();
-    if (query.trim() === '') {
+    event.cancelable && event.preventDefault();
+
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (normalizedQuery === '') {
       toast.error('Please enter image title!', {
         position: 'top-center',
         autoClose: 3000,
@@ -23,9 +22,8 @@ function Searchbar() {
       return;
     }
 
-    //  onSubmit({ query });
+    onSubmit(normalizedQuery);
     setQuery({ query: '' });
-    event.target.reset();
   };
 
   return (
@@ -43,7 +41,7 @@ function Searchbar() {
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
-          onChange={handleImageChange}
+          onChange={({ target }) => setQuery(target.value)}
         />
       </form>
     </header>
