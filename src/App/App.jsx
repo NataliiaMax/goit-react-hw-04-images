@@ -38,30 +38,29 @@ function App() {
     if (!query) {
       return;
     }
+    const renderGallery = async () => {
+      setStatus('pending');
+      try {
+        const { hits, totalHits } = await fetchGallery(query, page);
+        if (totalHits === 0) {
+          setShowButton(false);
+          setStatus('idle');
+          return toast.warn('No images on your query!');
+        }
+
+        const newImages = queryValues(hits);
+        setImages(images => [...images, ...newImages], totalHits);
+        setShowButton(true);
+        setStatus('resolved');
+      } catch (error) {
+        setStatus('rejected');
+        toast.error('Oops... Something went wrong');
+      } finally {
+        setStatus('idle');
+      }
+    };
     renderGallery();
   }, [page, query]);
-
-  const renderGallery = async () => {
-    setStatus('pending');
-    try {
-      const { hits, totalHits } = await fetchGallery(query, page);
-      if (totalHits === 0) {
-        setShowButton(false);
-        setStatus('idle');
-        return toast.warn('No images on your query!');
-      }
-
-      const newImages = queryValues(hits);
-      setImages(images => [...images, ...newImages], totalHits);
-      setShowButton(true);
-      setStatus('resolved');
-    } catch (error) {
-      setStatus('rejected');
-      toast.error('Oops... Something went wrong');
-    } finally {
-      setStatus('idle');
-    }
-  };
 
   const openModal = (largeImageURL, tags) => {
     toggleModal();
