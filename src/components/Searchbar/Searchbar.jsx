@@ -11,7 +11,7 @@ function Searchbar({ onSubmit }) {
   const handleSubmit = event => {
     event.preventDefault();
 
-    const normalizedQuery = query.toLowerCase();
+    const normalizedQuery = query.trim().toLowerCase();
 
     if (normalizedQuery === '') {
       toast.error('Please enter image title!', {
