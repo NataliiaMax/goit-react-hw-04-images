@@ -72,7 +72,7 @@ function App() {
     setShowModal(!showModal);
   };
 
-  return (
+        return (
     <div>
       <Searchbar onSubmit={handleFormSubmit}></Searchbar>
       {images.length > 0 && (
